@@ -1,117 +1,141 @@
-import React from "react";
-import "../index.css"
-const HomePage = () => {
+import React, { useEffect, useState } from "react";
+import "../index.css";
+import "./HomePage.css";
+import Navbar from "../Components/Navbar";
+import Footer from "../Components/Footer";
+import BookingPage from "./BookingPage";
+
+const HomePage = ({ dark, setDark }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  // Handle form submission (currently not implemented)
+  const handleSubmit = () => {};
+
+  // navbar scroll effect ( navbar bg color change on scroll)
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      console.log("scrollY:", scrollPosition); // Debugging the scroll position
+      setIsScrolled(scrollPosition > 10); // Update isScrolled when scroll exceeds 10px
+    };
+
+    // Add event listener
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []); 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Hero Section */}
-      <header className="bg-blue-600 text-white py-8">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl font-bold">Welcome to Bus Ticket Booking</h1>
-          <p className="mt-2 text-lg">
-            Book tickets for your favorite destinations quickly and easily!
-          </p>
-        </div>
-      </header>
-
-      {/* Search Section */}
-      <section className="bg-white py-12 shadow">
-        <div className="container mx-auto px-4">
-          <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-center mb-6">
-              Find Your Bus
-            </h2>
-            <form className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {/* Source */}
-              <div>
-                <label
-                  htmlFor="source"
-                  className="block text-gray-700 font-medium mb-1"
-                >
-                  Source
-                </label>
-                <input
-                  type="text"
-                  id="source"
-                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter source city"
-                />
-              </div>
-
-              {/* Destination */}
-              <div>
-                <label
-                  htmlFor="destination"
-                  className="block text-gray-700 font-medium mb-1"
-                >
-                  Destination
-                </label>
-                <input
-                  type="text"
-                  id="destination"
-                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"
-                  placeholder="Enter destination city"
-                />
-              </div>
-
-              {/* Date */}
-              <div>
-                <label
-                  htmlFor="date"
-                  className="block text-gray-700 font-medium mb-1"
-                >
-                  Date
-                </label>
-                <input
-                  type="date"
-                  id="date"
-                  className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex items-end">
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
-                >
-                  Search Buses
-                </button>
-              </div>
-            </form>
+    // Home Page
+    <div className={`min-h-screen sticky flex flex-col`}>
+      <div>
+        {/* Navbar component */}
+        <Navbar
+          dark={dark}
+          setDark={setDark}
+          isScrolled={isScrolled}
+          setIsScrolled={setIsScrolled}
+        />
+        {/* Main content */}
+        <main className="flex-grow">
+          <div className="text-4xl text-white text-center p-8 ">
+            Welcome to the QBus Booking System
           </div>
-        </div>
-      </section>
+          <div className="w-full rounded-lg">
+            <section className="py-8">
+              {/* search buses section */}
+              <div className="container mx-auto">
+                <div className=" rounded-lg shadow-md form">
+                  <h2 className="text-3xl font-bold text-center mb-6 text-white">
+                    Find Your Bus
+                  </h2>
+                  {/* search bus form */}
+                  <form
+                    className="grid grid-cols-1 md:grid-cols-4 gap-4 "
+                    onSubmit={handleSubmit}
+                  >
+                    <div>
+                      <label
+                        htmlFor="source"
+                        className="block text-white font-medium mb-1"
+                      >
+                        Source
+                      </label>
+                      <input
+                        type="text"
+                        id="source"
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"
+                        placeholder="Enter source city"
+                      />
+                    </div>
 
-      {/* Popular Routes */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-6">
-            Popular Bus Routes
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              "Colombo to Jaffna",
-              "Kandy to Galle",
-              "Anuradhapura to Nuwara Eliya",
-              "Batticaloa to Trincomalee",
-            ].map((route, index) => (
-              <div
-                key={index}
-                className="bg-white p-4 rounded-lg shadow hover:shadow-lg text-center"
-              >
-                <h3 className="font-medium text-gray-700">{route}</h3>
+                    <div>
+                      <label
+                        htmlFor="destination"
+                        className="block text-gray-100 font-medium mb-1"
+                      >
+                        Destination
+                      </label>
+                      <input
+                        type="text"
+                        id="destination"
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"
+                        placeholder="Enter destination city"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="date"
+                        className="block text-gray-100 font-medium mb-1"
+                      >
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        id="date"
+                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="flex items-end">
+                      <button
+                        type="submit"
+                        className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
+                      >
+                        Search Buses
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-6">
-        <div className="container mx-auto text-center">
-          <p>&copy; 2025 Bus Ticket Booking. All rights reserved.</p>
-        </div>
-      </footer>
+            {/* Popular Routes */}
+            <section className="">
+              <div className="container mx-auto px-4 form">
+                <h2 className="text-3xl font-bold text-center text-gray-100 mb-6">
+                  Popular Bus Routes
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {[
+                    "Colombo to Jaffna",
+                    "Kandy to Galle",
+                    "Anuradhapura to Nuwara Eliya",
+                    "Batticaloa to Trincomalee",
+                  ].map((route, index) => (
+                    <div
+                      key={index}
+                      className="bg-white p-4 rounded-lg shadow hover:shadow-lg text-center"
+                    >
+                      <h3 className="font-medium text-gray-700">{route}</h3>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
