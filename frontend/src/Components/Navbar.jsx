@@ -35,11 +35,6 @@ export default function Navbar({dark,  setDark ,isScrolled}) {
             </li>
           </Link>
           <Link spy={true} smooth={true} to={""}>
-            <li className="cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
-              FAQ
-            </li>
-          </Link>
-          <Link spy={true} smooth={true} to={""}>
           <li className=" flex items-center justify-center cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
           <FaUser className="mx-2"/><span>Login</span>
                 </li>
@@ -106,17 +101,17 @@ export default function Navbar({dark,  setDark ,isScrolled}) {
               </Link>
               <Link spy={true} smooth={true} to={""}>
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900">
-                  Home
+                  About
                 </li>
               </Link>
               <Link spy={true} smooth={true} to={""}>
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900">
-                  Home
+                  Contact
                 </li>
               </Link>
               <Link spy={true} smooth={true} to={""}>
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900">
-                  Home
+                  Services
                 </li>
               </Link>
               <Link spy={true} smooth={true} to={""}>
