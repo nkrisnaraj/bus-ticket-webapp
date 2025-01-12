@@ -1,27 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect } from "react";
+import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import Navbar from "./Components/Navbar";
+import Footer from "./Components/Footer";
+import { useState } from "react";
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-// import SearchResultsPage from './pages/SearchResultsPage';
-// import BookingPage from './pages/BookingPage';
-// import LoginPage from './pages/LoginPage';
-// import DashboardPage from './pages/DashboardPage';
-
-function App() {
+export default function App() {
+  const [dark, setDark] = useState(false);
+  
+  
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        {/* <Route path="/search" element={<SearchResultsPage />} />
-        <Route path="/booking" element={<BookingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} /> */}
-      </Routes>
-    </Router>
+    <div className={`min-h-screen ${dark ? "dark" : "light"}`}>
+      <Router>
+        <main className="flex-grow">
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <HomePage
+                  dark={dark}
+                  setDark={setDark}
+                />
+              }
+            />
+          </Routes>
+        </main>
+        <Footer />
+      </Router>
+    </div>
   );
 }
-
-export default App;
