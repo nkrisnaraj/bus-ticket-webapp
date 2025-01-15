@@ -1,0 +1,108 @@
+:root {
+  --background-color: rgba(255, 255, 255, 0.53);
+  --border-color: rgba(255, 255, 255, 0.3);
+  --text-color: #000;
+  --primary-color: #007bff;
+  --secondary-color: rgba(0, 0, 0, 0.1);
+  --form-bg: rgba(255, 255, 255, 0.171);
+  --form-text-color: #000;
+  --form-list-heading:rgb(65, 65, 65);
+  --button-bg: #007bff;
+  --button-color: #fff;
+  --box-bg:#dbdbdb;
+  --box-shadow:0 4px 8px rgba(0, 0, 0, 0.644);
+  --box-bg-hover:rgb(255, 255, 255);
+}
+
+.dark {
+  --background-color: rgba(0, 0, 0, 0.8);
+  --border-color: rgba(255, 255, 255, 0.2);
+  --text-color: #fff;
+  --primary-color: #1da1f2;
+  --secondary-color: rgba(255, 255, 255, 0.1);
+  --form-bg: rgba(0, 0, 0, 0.26);
+  --form-text-color: #ffffff;
+  --form-list-heading:rgb(187, 187, 187);
+  --button-bg: #17a2b8;
+  --button-color: #fff;
+  --box-bg: #2e3541;
+  --box-shadow:0 4px 8px rgba(255, 255, 255, 0.644);
+  --box-bg-hover:rgb(8, 6, 33);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.form {
+  background-color: var(--form-bg);
+  padding: 4% 3%;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  color: var(--text-color);
+}
+.bus.form {
+  background-color: var(--background-color);
+  padding: 2% 1%;
+}
+
+.light {
+  background:
+    linear-gradient(var(--secondary-color), rgba(0, 0, 0, 0.3)),
+    url('../assets/images/bus2.jpg');
+  background-position: center;
+  background-size: cover;
+
+  /* background-repeat: no-repeat;
+  background-attachment: fixed;
+  height: 100vh;  */
+
+}
+
+.dark {
+  background:
+    linear-gradient(var(--secondary-color), rgba(0, 0, 0, 0.7)),
+    url('../assets/images/bus1.jpg');
+  background-position:right;
+  background-size: cover;
+  /* background-repeat: no-repeat;
+  background-attachment: fixed;
+  height: 100vh; */
+}
+
+button {
+  background-color: var(--button-bg);
+  color: var(--button-color);
+}
+.theme{
+  color: var(--text-color);
+
+}
+.box-theme {
+  background-color: var(--box-bg);
+  color: var(--text-color);
+}
+.box-theme .list-heading{
+  color:var(--form-list-heading);
+}
+
+.box-theme:hover{
+  box-shadow: var(--box-shadow);
+  background-color: var(--box-bg-hover);
+  
+}
+.list-text{
+  font-size: medium;
+  font-weight: bold;
+}
+.text-color{ 
+  color:var(--text-color);
+}
