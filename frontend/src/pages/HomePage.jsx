@@ -1,14 +1,55 @@
 import React, { useEffect, useState } from "react";
-import "../index.css";
-import "./HomePage.css";
+import "../styles/index.css";
+import "../styles/HomePage.css";
 import Navbar from "../Components/Navbar";
-import Footer from "../Components/Footer";
-import BookingPage from "./BookingPage";
+import { useNavigate } from "react-router-dom";
+
 
 const HomePage = ({ dark, setDark }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const navigate = useNavigate();
+
   // Handle form submission (currently not implemented)
-  const handleSubmit = () => {};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = {
+      source: e.target.source.value,
+      destination: e.target.destination.value,
+      date: e.target.date.value,
+    };
+  
+    // Navigate to results page with search data
+    if(formData.date && formData.destination && formData.source){
+      navigate("/search-results", { state: formData });
+    }else{
+      alert("fill all input fields")
+    }
+    
+  };
+  //   try {
+  //     const response = await fetch("http://localhost:5000/search-buses", {
+  //       method: "POST", // Use POST method to send data
+  //       headers: {
+  //         "Content-Type": "application/json", // Specify JSON data format
+  //       },
+  //       body: JSON.stringify(formData), // Convert the form data to a JSON string
+  //     });
+  
+  //     // Handle the response
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       console.log("Buses found:", data);
+  //       // Process the response data (e.g., display the buses or navigate to another page)
+  //     } else {
+  //       console.error("Failed to search buses:", response.statusText);
+  //       // Handle the error response
+  //     }
+  //   } catch (error) {
+  //     console.error("Error occurred while searching buses:", error);
+  //     // Handle the error
+  //   }
+  // };
+  
 
   // navbar scroll effect ( navbar bg color change on scroll)
   useEffect(() => {
@@ -29,12 +70,6 @@ const HomePage = ({ dark, setDark }) => {
     <div className={`min-h-screen sticky flex flex-col`}>
       <div>
         {/* Navbar component */}
-        <Navbar
-          dark={dark}
-          setDark={setDark}
-          isScrolled={isScrolled}
-          setIsScrolled={setIsScrolled}
-        />
         {/* Main content */}
         <main className="flex-grow">
           <div className="text-4xl text-white text-center p-8 ">
@@ -45,7 +80,7 @@ const HomePage = ({ dark, setDark }) => {
               {/* search buses section */}
               <div className="container mx-auto">
                 <div className=" rounded-lg shadow-md form">
-                  <h2 className="text-3xl font-bold text-center mb-6 text-white">
+                  <h2 className="text-3xl font-bold text-center mb-6 ">
                     Find Your Bus
                   </h2>
                   {/* search bus form */}
@@ -56,7 +91,7 @@ const HomePage = ({ dark, setDark }) => {
                     <div>
                       <label
                         htmlFor="source"
-                        className="block text-white font-medium mb-1"
+                        className="block efont-medium mb-1"
                       >
                         Source
                       </label>
@@ -71,7 +106,7 @@ const HomePage = ({ dark, setDark }) => {
                     <div>
                       <label
                         htmlFor="destination"
-                        className="block text-gray-100 font-medium mb-1"
+                        className="block font-medium mb-1"
                       >
                         Destination
                       </label>
@@ -85,14 +120,14 @@ const HomePage = ({ dark, setDark }) => {
                     <div>
                       <label
                         htmlFor="date"
-                        className="block text-gray-100 font-medium mb-1"
+                        className="block font-medium mb-1"
                       >
                         Date
                       </label>
                       <input
                         type="date"
                         id="date"
-                        className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"
+                        className="w-full border text-gray-900 rounded-lg px-4 py-2 focus:outline-none focus:ring focus:ring-blue-300"
                       />
                     </div>
 
@@ -113,7 +148,7 @@ const HomePage = ({ dark, setDark }) => {
             {/* Popular Routes */}
             <section className="">
               <div className="container mx-auto px-4 form">
-                <h2 className="text-3xl font-bold text-center text-gray-100 mb-6">
+                <h2 className="text-3xl font-bold text-center mb-6">
                   Popular Bus Routes
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
