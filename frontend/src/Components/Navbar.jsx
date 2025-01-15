@@ -1,50 +1,70 @@
-import { Link } from "react-scroll";
-import logo from "../../public/images/QBus-logo.png";
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import logo from "../assets/images/QBus-logo.png";
+import { useEffect, useRef, useState } from "react";
 import { CiMenuFries } from "react-icons/ci";
 import { FaMoon, FaSun, FaTimes, FaUser } from "react-icons/fa";
 
 export default function Navbar({dark,  setDark ,isScrolled}) {
   const [click, setClick] = useState(false);
-  const handleClick = () => setClick(!click); // Toggle mobile menu
-  const handleDark = () => setDark(!dark); // Toggle dark mode
+  const navRef = useRef(null);
+
+  const handleClick = () => {
+    setClick(!click); // Toggle mobile menu
+  };
+
+  const handleOutsideClick = (event) => {
+    if (navRef.current && !navRef.current.contains(event.target)) {
+      setClick(false); // Close menu if clicking outside
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
+  const handleDark = () => {
+    setDark(!dark); 
+
+  }// Toggle dark mode
  //content for mobile menu
   const content = (
     <>
-      <div className="lg:hidden block absolute top-14 w-full left-0 right-0 bg-gray-800 transition z-50">
+      <div className="lg:hidden md:hidden absolute block top-14 w-full left-0 right-0 bg-gray-800 transition z-50">
         {/* naviagation links */}
         <ul className="text-center text-xl px-16">
-          <Link spy={true} smooth={true} to={""}>
+          <Link to={""} onClick={() => handleClick()}>
             <li className="cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
               Home
             </li>
           </Link>
-          <Link spy={true} smooth={true} to={""}>
+          <Link to={""} onClick={() => handleClick()}>
             <li className="cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
               About
             </li>
           </Link>
-          <Link spy={true} smooth={true} to={""}>
+          <Link to={""} onClick={() => handleClick()}>
             <li className="cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
               Contact
             </li>
           </Link>
-          <Link spy={true} smooth={true} to={""}>
+          <Link to={""} onClick={() => handleClick()}>
             <li className="cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
               Services
             </li>
           </Link>
-          <Link spy={true} smooth={true} to={""}>
+          <Link to={""} onClick={() => handleClick()}>
           <li className=" flex items-center justify-center cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
           <FaUser className="mx-2"/><span>Login</span>
                 </li>
               </Link>
 
             {/* Dark mode toggle */}
-          <li className="cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
+          <li className="cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900" onClick={() => handleClick()}>
           <button 
               className="cursor-pointer hover:text-blue-900 transition justify-between items-center hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900 hover:border-blue-900"
-              onClick={() => handleDark()}
+              onClick={() => handleDark()} 
               >
                 {dark ? (
                   <div className="flex items-center">
@@ -63,7 +83,7 @@ export default function Navbar({dark,  setDark ,isScrolled}) {
   );
   return (
     // Navbar
-    <nav  className={`sticky top-0 left-0 w-full z-50 ${isScrolled ? dark? "bg-gray-700 shadow-lg ":"bg-gray-100" : "bg-transparent"
+    <nav ref={navRef} className={`sticky top-0 left-0 w-full z-50 ${isScrolled ? dark? "bg-gray-900 shadow-lg border-b-2 border-gray-600 ":"bg-gray-100" : "bg-transparent"
       }`}> 
       <div className=" flex justify-between text-white lg:py-4 py-3 lg:ps-16 ps-8 z-50 px-1 ">
         {/* Logo */}
@@ -75,7 +95,7 @@ export default function Navbar({dark,  setDark ,isScrolled}) {
           />
         </div>
         {/* desktop navigation */}
-        <div className={`lg:flex md:flex lg: flex-1 items-center justify-end font-normal hidden ${dark? "text-white ":"text-black "}`}>
+        <div className={`lg:flex md:flex lg:flex-1 items-center justify-end font-normal hidden ${dark? "text-white ":"text-black "}`}>
         {/*  dark mood toggle*/}
         <button 
               className="cursor-pointer hover:text-blue-900 transition items-center hover:bg-gray-300 px-2 mr-2 py-1 rounded-xl border-gray-900 hover:border-blue-900 flex gap-2 items-end"
@@ -94,27 +114,27 @@ export default function Navbar({dark,  setDark ,isScrolled}) {
           <div className="flex-10">
             <ul className="flex gap-4 mr-8">
               
-              <Link spy={true} smooth={true} to={""}>
+              <Link to={"/"}>
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900">
                   Home
                 </li>
               </Link>
-              <Link spy={true} smooth={true} to={""}>
+              <Link to={"/seatMap"}>
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900">
-                  About
+                  Seats
                 </li>
               </Link>
-              <Link spy={true} smooth={true} to={""}>
+              <Link to={""}>
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900">
                   Contact
                 </li>
               </Link>
-              <Link spy={true} smooth={true} to={""}>
+              <Link to={""}>
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900">
                   Services
                 </li>
               </Link>
-              <Link spy={true} smooth={true} to={""}>
+              <Link to={""} >
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900 flex gap-2 items-center">
                   <FaUser/><span>Login</span>
                 </li>
@@ -124,7 +144,7 @@ export default function Navbar({dark,  setDark ,isScrolled}) {
         </div>
         <div>{click && content}</div>
         <button
-          className="block lg:hidden sm:hidden transition  bg-gray-500 text-gray-900  py-1 px-2 rounded-lg"
+          className="block lg:hidden md:hidden transition  bg-gray-500 text-gray-900  py-1 px-2 rounded-lg"
           onClick={() => handleClick()}
         >
           {click ? <FaTimes /> : <CiMenuFries className="w-4 h-4" />}
