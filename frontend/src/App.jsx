@@ -6,8 +6,6 @@ import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import { useState } from "react";
 import SearchResultsPage from "./pages/SearchResultsPage";
-import SeatMap from "./pages/SeatMap";
-import BusSeat from "./pages/BusSeat";
 import BusSeatEx from "./pages/BusSeats";
 
 
