@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Link } from "react-router-dom";
 import logo from "../assets/images/QBus-logo.png";
 import { useEffect, useRef, useState } from "react";
@@ -54,7 +55,7 @@ export default function Navbar({dark,  setDark ,isScrolled}) {
               Services
             </li>
           </Link>
-          <Link to={""} onClick={() => handleClick()}>
+          <Link to={"/login"} onClick={() => handleClick()}>
           <li className=" flex items-center justify-center cursor-pointer my-2 py-2 hover:text-blue-900 transition border-b-2 hover:bg-gray-300  rounded-xl border-gray-900  hover:border-blue-900">
           <FaUser className="mx-2"/><span>Login</span>
                 </li>
@@ -134,7 +135,7 @@ export default function Navbar({dark,  setDark ,isScrolled}) {
                   Services
                 </li>
               </Link>
-              <Link to={""} >
+              <Link to={"/login"} >
                 <li className="shadow cursor-pointer hover:text-blue-900 transition border-b-2 hover:bg-gray-300 px-3 py-1 rounded-xl border-gray-900  hover:border-blue-900 flex gap-2 items-center">
                   <FaUser/><span>Login</span>
                 </li>

@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { GiSteeringWheel } from "react-icons/gi";
 import chair from "../assets/images/seat.png";
@@ -6,10 +9,11 @@ import busImg from "../assets/images/bus1.jpg";
 import { useLocation } from "react-router-dom";
 import { MdOutlineDoubleArrow } from "react-icons/md";
 
-const BusSeatEx = () => {
+const BusSeats = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [showError, setShowError] = useState(false);
   const [device, setDevice] = useState(null);
+  const [availableSeats,setAvailableSeats] = useState([])
   const [selectBus , setSelectBus] = useState([])
   const busSeatData = [];
   const location = useLocation();
@@ -19,6 +23,9 @@ const BusSeatEx = () => {
   useEffect(()=>{
     if(Bus && Bus.length>0){
       setSelectBus(Bus);
+      setAvailableSeats(Bus[0].seats)
+      console.log("received bus",Bus);
+      console.log("received seats",Bus[0].seats);
     }else{
      console.error(error);
     }
@@ -47,12 +54,12 @@ const BusSeatEx = () => {
 
   for (let col = 1; col <= 12; col++) {
     for (let row = 1; row <= 5; row++) {
-      let status;
-      if ((col * row) % 2 === 0) {
-        status = "booked";
-      } else {
-        status = "available";
-      }
+      // let status;
+      // if ((col * row) % 2 === 0) {
+      //   status = "booked";
+      // } else {
+      //   status = "available";
+      // }
       // Skip all invalid seats based on the given conditions
       if (
         (row === 3 && col !== 12) || // Skip all seats in row 3 except column 12
@@ -62,7 +69,7 @@ const BusSeatEx = () => {
       }
       busSeatData.push({
         id: busSeatData.length + 1,
-        status: status, // Default status
+        status: Bus[0].seats[busSeatData.length].isBooked, // Default status
         row: row,
         col: col,
       });
@@ -255,7 +262,7 @@ const BusSeatEx = () => {
                         <span className="lg:text-sm md:text-xs text-xxs list-heading lg:hidden md:hidden flex">
                           Available Seats
                         </span>
-                        <span className="lg:hidden md:hidden flex"> 45</span>
+                        <span className="lg:hidden md:hidden flex">{availableSeats.length}</span>
                         <span className="flex lg:text-base md:text-sm text-xs list-heading lg:block italic md:block hidden">
                           Available
                         </span>
@@ -265,7 +272,7 @@ const BusSeatEx = () => {
                       </div>
 
                       <span className="lg:text-3xl md:text-2xl flex lg:block md:block hidden border-l-2 ml-4 font-bold px-4">
-                        45
+                        {availableSeats.length}
                       </span>
                     </div>
                   </div>
@@ -520,4 +527,4 @@ const BusSeatEx = () => {
   );
 };
 
-export default BusSeatEx;
+export default BusSeats;

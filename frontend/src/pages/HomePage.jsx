@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import "../styles/index.css";
 import "../styles/HomePage.css";
@@ -69,8 +71,7 @@ const HomePage = ({ dark, setDark }) => {
     // Home Page
     <div className={`min-h-screen sticky flex flex-col`}>
       <div>
-        {/* Navbar component */}
-        {/* Main content */}
+
         <main className="flex-grow">
           <div className="text-4xl text-white text-center p-8 ">
             Welcome to the QBus Booking System

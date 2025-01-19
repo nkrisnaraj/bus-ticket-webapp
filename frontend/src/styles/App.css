@@ -40,7 +40,9 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
 }
-
+form input{
+  color:#000;
+}
 .form {
   background-color: var(--form-bg);
   padding: 4% 3%;

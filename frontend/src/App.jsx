@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+/* eslint-disable no-unused-vars */
+import { useEffect } from "react";
 import "./styles/App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
@@ -6,9 +7,12 @@ import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import { useState } from "react";
 import SearchResultsPage from "./pages/SearchResultsPage";
-import SeatMap from "./pages/SeatMap";
-import BusSeat from "./pages/BusSeat";
-import BusSeatEx from "./pages/BusSeats";
+//import SeatMap from "./pages/SeatMap";
+// import BusSeat from "./pages/BusSeat";
+import Login from "./pages/Login";
+import BusSeats from "./pages/BusSeats";
+// import BusSeats from "./pages/BusSeats";
+// usSeatEx from "./pages/BusSeats";
 
 
 export default function App() {
@@ -64,7 +68,8 @@ export default function App() {
               element={<HomePage dark={dark} setDark={setDark} />}
             />
             <Route path="/search-results" element={<SearchResultsPage />} />
-            <Route path="/seat" element={<BusSeatEx />} />
+            <Route path="/seat" element={<BusSeats/>} />
+            <Route path="/login" element={<Login/>}/>
           </Routes>
         </main>
         <Footer />
