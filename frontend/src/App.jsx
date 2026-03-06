@@ -1,18 +1,31 @@
-/* eslint-disable no-unused-vars */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./styles/App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
-import { useState } from "react";
 import SearchResultsPage from "./pages/SearchResultsPage";
-//import SeatMap from "./pages/SeatMap";
-// import BusSeat from "./pages/BusSeat";
 import Login from "./pages/Login";
 import BusSeats from "./pages/BusSeats";
-// import BusSeats from "./pages/BusSeats";
-// usSeatEx from "./pages/BusSeats";
+import UserDashboard from "./pages/UserDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import BookingSuccess from "./pages/BookingSuccess";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./Components/ProtectedRoute";
+import AdminRoute from "./Components/AdminRoute";
+
+// Hides Navbar & Footer on full-screen routes like /admin
+const Shell = ({ dark, setDark, isScrolled, children }) => {
+  const { pathname } = useLocation();
+  const hideChrome = pathname.startsWith("/admin");
+  return (
+    <>
+      {!hideChrome && <Navbar dark={dark} setDark={setDark} isScrolled={isScrolled} />}
+      <main className="flex-grow">{children}</main>
+      {!hideChrome && <Footer />}
+    </>
+  );
+};
 
 
 export default function App() {
@@ -53,28 +66,51 @@ export default function App() {
   }, []);
 
   return (
-    <div className={`min-h-screen flex flex-col duration-500 transform ${dark ? "dark" : "light"}`}>
-      <Router>
-        <Navbar
-          dark={dark}
-          setDark={setDark}
-          isScrolled={isScrolled}
-          setIsScrolled={setIsScrolled}
-        />
-        <main className="flex-grow">
-          <Routes>
-            <Route
-              path="/"
-              element={<HomePage dark={dark} setDark={setDark} />}
-            />
-            <Route path="/search-results" element={<SearchResultsPage />} />
-            <Route path="/seat" element={<BusSeats/>} />
-            <Route path="/login" element={<Login/>}/>
-          </Routes>
-        </main>
-        <Footer />
-      </Router>
-    </div>
+    <AuthProvider>
+      <div className={`min-h-screen flex flex-col duration-500 transform ${dark ? "dark" : "light"}`}>
+        <Router>
+          <Shell dark={dark} setDark={setDark} isScrolled={isScrolled}>
+            <Routes>
+              <Route path="/" element={<HomePage dark={dark} setDark={setDark} />} />
+              <Route path="/search-results" element={<SearchResultsPage />} />
+              <Route
+                path="/seat"
+                element={
+                  <ProtectedRoute>
+                    <BusSeats />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <UserDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/booking-success"
+                element={
+                  <ProtectedRoute>
+                    <BookingSuccess />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/login" element={<Login />} />
+            </Routes>
+          </Shell>
+        </Router>
+      </div>
+    </AuthProvider>
   );
 }
 

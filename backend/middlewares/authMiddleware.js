@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 exports.protect = (req, res, next) => {
-  const token = req.header('Authorization')?.split(' ')[1]; // Extract token from "Bearer token"
+  const token = req.header('Authorization')?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ success: false, message: 'Access denied, no token provided' });
@@ -9,9 +9,18 @@ exports.protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user info to the request object
+    req.user = decoded;
     next();
   } catch (error) {
     res.status(401).json({ success: false, message: 'Invalid token' });
   }
+};
+
+exports.adminProtect = (req, res, next) => {
+  exports.protect(req, res, () => {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+    next();
+  });
 };

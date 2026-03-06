@@ -1,35 +1,24 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable no-undef */
-/* eslint-disable no-unused-vars */
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { GiSteeringWheel } from "react-icons/gi";
 import chair from "../assets/images/seat.png";
 import arrow from "../assets/images/arrow.png";
 import busImg from "../assets/images/bus1.jpg";
 import { useLocation } from "react-router-dom";
 import { MdOutlineDoubleArrow } from "react-icons/md";
+import { useAuth } from "../context/AuthContext";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const BusSeats = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [showError, setShowError] = useState(false);
   const [device, setDevice] = useState(null);
-  const [availableSeats,setAvailableSeats] = useState([])
-  const [selectBus , setSelectBus] = useState([])
-  const busSeatData = [];
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingMsg, setBookingMsg] = useState({ type: "", text: "" });
+  const { token } = useAuth();
   const location = useLocation();
 
-  const {Bus} = location.state || {};
-
-  useEffect(()=>{
-    if(Bus && Bus.length>0){
-      setSelectBus(Bus);
-      setAvailableSeats(Bus[0].seats)
-      console.log("received bus",Bus);
-      console.log("received seats",Bus[0].seats);
-    }else{
-     console.error(error);
-    }
-  },[Bus]);
+  const { Schedule: schedule } = location.state || {};
 
   const isLgOrMd = device === "lg" || device === "md";
 
@@ -52,31 +41,22 @@ const BusSeats = () => {
     return () => window.removeEventListener("resize", updateDevice); // Cleanup on unmount
   }, []);
 
+  const bookedSeatNumbers = schedule?.bookedSeats?.map((s) => s.seatNumber) || [];
+  const busSeatData = [];
   for (let col = 1; col <= 12; col++) {
     for (let row = 1; row <= 5; row++) {
-      // let status;
-      // if ((col * row) % 2 === 0) {
-      //   status = "booked";
-      // } else {
-      //   status = "available";
-      // }
-      // Skip all invalid seats based on the given conditions
-      if (
-        (row === 3 && col !== 12) || // Skip all seats in row 3 except column 12
-        (col === 11 && row > 2) // Skip column 11 for rows greater than 2
-      ) {
-        continue;
-      }
+      if ((row === 3 && col !== 12) || (col === 11 && row > 2)) continue;
+      const seatId = busSeatData.length + 1;
+      const seatNumber = String(seatId); // matches the number shown on the seat button
       busSeatData.push({
-        id: busSeatData.length + 1,
-        status: Bus[0].seats[busSeatData.length].isBooked, // Default status
-        row: row,
-        col: col,
+        id: seatId,
+        seatNumber,
+        status: bookedSeatNumbers.includes(seatNumber) ? "booked" : "available",
+        row,
+        col,
       });
     }
   }
-
-  // console.log(busSeatData);
 
   const handleSeatClick = (seatId) => {
     const selectedSeats = busSeatData.find((seat) => seat.id === seatId);
@@ -106,7 +86,42 @@ const BusSeats = () => {
       return () => clearTimeout(timer);
     }
   }, [showError]);
-  //set seat status 
+
+  const handleCheckout = async () => {
+    if (selectedSeats.length === 0 || !schedule?._id) return;
+
+    const seatNumbersToBook = selectedSeats
+      .map((id) => busSeatData.find((s) => s.id === id)?.seatNumber)
+      .filter(Boolean);
+
+    setBookingLoading(true);
+    setBookingMsg({ type: "", text: "" });
+
+    try {
+      const response = await fetch(`${API_URL}/api/payment/create-checkout-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ scheduleId: schedule._id, seatNumbers: seatNumbersToBook }),
+      });
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Redirect to Stripe-hosted checkout page
+        window.location.href = data.url;
+      } else {
+        setBookingMsg({ type: "error", text: data.message || "Failed to initiate payment. Please try again." });
+      }
+    } catch {
+      setBookingMsg({ type: "error", text: "Error connecting to server." });
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  //set seat status
   const getSeatName = (seat) => {
     if (seat.status === "booked") {
       return "bg-red-600 cursor-not-allowed";
@@ -142,25 +157,24 @@ const BusSeats = () => {
   return (
 
     <div className="backdrop-blur-lg backdrop-brightness-90 min-h-screen pt-16 text-color">
-      {/* selected bus details */}
-      <div className="container mx-auto  sm:px-6 lg:px-8 ">
+      {/* selected schedule details */}
+      {schedule && (
+      <div className="container mx-auto sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6">
-          {selectBus.map((bus) => (
             <div
-              key={bus.id}
-              className="box-theme duration-300 transform hover:scale-105 rounded-lg border-b-2  border-gray-400 shadow-md "
+              className="box-theme duration-300 transform hover:scale-105 rounded-lg border-b-2 border-gray-400 shadow-md"
             >
               <div className="flex-column rounded-lg">
                 {/* header section */}
                 <div className="flex rounded-t-lg bg-yellow-600 p-3 text-gray-100 justify-between items-center">
                   <span className="text-sm md:text-base font-medium">
-                    Stops @ {bus.source}
+                    {schedule.source} → {schedule.destination}
                   </span>
                   <span className="text-sm md:text-base font-medium">
-                    Route @ {bus.id}
+                    {schedule.busId?.busNumber || ""}
                   </span>
                 </div>
-                <div className=" px-4 py-2 flex grid lg:grid-cols-6 md:grid-cols-5 grid-cols-4 flex-col md:flex-row">
+                <div className="px-4 py-2 flex grid lg:grid-cols-6 md:grid-cols-5 grid-cols-4 flex-col md:flex-row">
                   {/* Departure Section */}
                   <div className="">
                     <ul className="flex flex-col">
@@ -168,34 +182,33 @@ const BusSeats = () => {
                         Departure
                       </li>
                       <li className="lg:text-base md:text-sm text-xs font-bold pb-2 uppercase">
-                        {bus.source}
+                        {schedule.source}
                       </li>
                       <li className="lg:text-sm md:text-xs text-xxs list-heading">
                         Date
                       </li>
                       <li className="lg:text-base md:text-sm text-xs font-bold pb-2">
-                        {bus.Depart_date}
+                        {schedule.departureDate}
                       </li>
                       <li className="lg:text-xs md:text-xs text-xxs list-heading">
                         Time
                       </li>
-                      <li className="lg:text-base md:text-sm text-xs font-bold pb-2 ">
-                        {bus.Depart_time}
+                      <li className="lg:text-base md:text-sm text-xs font-bold pb-2">
+                        {schedule.departureTime}
                       </li>
                     </ul>
                   </div>
 
                   {/* Arrow Icon */}
-                  <div className="flex flex-col items-start  mt-8  justify-center">
+                  <div className="flex flex-col items-start mt-8 justify-center">
                     <div className="flex items-center rounded-xl">
-            
                       <MdOutlineDoubleArrow className="text-red-800 text-6xl flex items-center"/>
                     </div>
                     {/* travel duration */}
-                    <div className="flex items-center row -ml-3 mt-9 ">
+                    <div className="flex items-center row -ml-3 mt-9">
                       <span className="text-xs">
                         Duration:{" "}
-                        {calculateDuration(bus.Depart_time, bus.Arrive_time)}
+                        {calculateDuration(schedule.departureTime, schedule.arrivalTime)}
                       </span>
                     </div>
                   </div>
@@ -206,43 +219,37 @@ const BusSeats = () => {
                       <li className="lg:text-sm md:text-xs text-xxs list-heading">
                         Arrival
                       </li>
-                      <li className="lg:text-base md:text-sm text-xs font-bold pb-2   uppercase">
-                        {bus.destination}
+                      <li className="lg:text-base md:text-sm text-xs font-bold pb-2 uppercase">
+                        {schedule.destination}
                       </li>
                       <li className="lg:text-sm md:text-xs text-xxs list-heading">
                         Date
                       </li>
-                      <li className="lg:text-base md:text-sm text-xs font-bold pb-2  ">
-                        {bus.Arrive_date}
+                      <li className="lg:text-base md:text-sm text-xs font-bold pb-2">
+                        {schedule.departureDate}
                       </li>
                       <li className="lg:text-sm md:text-xs text-xxs list-heading">
                         Time
                       </li>
-                      <li className="lg:text-base md:text-sm text-xs font-bold  pb-2 ">
-                        {bus.Arrive_time}
+                      <li className="lg:text-base md:text-sm text-xs font-bold pb-2">
+                        {schedule.arrivalTime}
                       </li>
                     </ul>
                   </div>
-                  {/* bus type and closing date */}
+                  {/* bus type info */}
                   <div className="hidden lg:block md:block ">
                     <ul className="flex flex-col">
                       <li className="lg:text-sm md:text-xs text-xxs list-heading">
                         Bus Type
                       </li>
                       <li className="lg:text-base md:text-sm text-xs font-bold pb-2  ">
-                        {bus.type}
+                        {schedule.busId?.type || "—"}
                       </li>
                       <li className="lg:text-sm md:text-xs text-xxs list-heading">
-                        Booking Closing Date
+                        Bus Number
                       </li>
                       <li className="lg:text-base md:text-sm text-xs font-bold pb-2  ">
-                        {bus.closing_Date}
-                      </li>
-                      <li className="lg:text-sm md:text-xs text-xxs list-heading">
-                        Booking Closing Time
-                      </li>
-                      <li className="lg:text-base md:text-sm text-xs font-bold pb-2  ">
-                        {bus.Closing_time}
+                        {schedule.busId?.busNumber || "—"}
                       </li>
                     </ul>
                   </div>
@@ -253,7 +260,7 @@ const BusSeats = () => {
                         <span className="lg:text-sm md:text-xs text-xxs">
                           Rs.{" "}
                         </span>
-                        {bus.price}.00
+                        {schedule.price?.toLocaleString()}
                       </li>
                       
                     </ul>
@@ -262,7 +269,7 @@ const BusSeats = () => {
                         <span className="lg:text-sm md:text-xs text-xxs list-heading lg:hidden md:hidden flex">
                           Available Seats
                         </span>
-                        <span className="lg:hidden md:hidden flex">{availableSeats.length}</span>
+                        <span className="lg:hidden md:hidden flex">{busSeatData.filter(s => s.status === "available").length}</span>
                         <span className="flex lg:text-base md:text-sm text-xs list-heading lg:block italic md:block hidden">
                           Available
                         </span>
@@ -272,7 +279,7 @@ const BusSeats = () => {
                       </div>
 
                       <span className="lg:text-3xl md:text-2xl flex lg:block md:block hidden border-l-2 ml-4 font-bold px-4">
-                        {availableSeats.length}
+                        {busSeatData.filter(s => s.status === "available").length}
                       </span>
                     </div>
                   </div>
@@ -280,9 +287,9 @@ const BusSeats = () => {
                 </div>
               </div>
             </div>
-          ))}
         </div>
       </div>
+      )}
       {/* horizontal divider */}
       <hr className="my-4 mx-16" />
 
@@ -511,15 +518,28 @@ const BusSeats = () => {
         </div>
 
       </div>
-      <div className="flex items-center lg:justify-evenly md:justify-evenly justify-center pb-3 ">
-        <div className="flex  justify-center ">
-          <div className="justify-center items-center lg:ml-28  flex text-white lg:text-lg md:text-lg text-xs flex-col lg:flex-row md:flex-row">
-            <span className="flex  itmes-center justify-start ">Selected Seats No :</span>
-            <span className="font-bold flex w-40 lg:w-56 md:w-56 justify-start">{"[ "}{selectedSeats.join(' , ')} ]</span>
+      {bookingMsg.text && (
+        <div
+          className={`mx-6 my-2 p-3 rounded text-center font-medium ${
+            bookingMsg.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
+          }`}
+        >
+          {bookingMsg.text}
+        </div>
+      )}
+      <div className="flex items-center lg:justify-evenly md:justify-evenly justify-center pb-3">
+        <div className="flex justify-center">
+          <div className="justify-center items-center lg:ml-28 flex text-white lg:text-lg md:text-lg text-xs flex-col lg:flex-row md:flex-row">
+            <span className="flex items-center justify-start">Selected Seats No : </span>
+            <span className="font-bold flex w-40 lg:w-56 md:w-56 justify-start">{"[ "}{selectedSeats.join(" , ")} ]</span>
           </div>
         </div>
-        <button className="flex lg:px-8 lg:py-2 px-2 py-1 rounded lg:mr-28">
-          Continue
+        <button
+          onClick={handleCheckout}
+          disabled={selectedSeats.length === 0 || bookingLoading}
+          className="flex lg:px-8 lg:py-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded lg:mr-28 transition-colors"
+        >
+          {bookingLoading ? "Redirecting to Payment..." : "Book Selected Seats"}
         </button>
       </div>
 
