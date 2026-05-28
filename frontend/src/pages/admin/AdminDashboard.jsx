@@ -16,11 +16,28 @@ const FIXED_SEATS = 47;
 // ── Utilities ─────────────────────────────────────────────────────────────────
 const computeArrivalDate = (depDate, depTime, arrTime) => {
   if (!depDate) return "";
-  if (!depTime || !arrTime || arrTime >= depTime) return depDate;
-  const d = new Date(depDate + "T00:00:00");
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().split("T")[0];
+
+  if (arrTime < depTime) {
+   
+    const [year, month, day] = depDate.split('-');
+    
+
+    const d = new Date(year, month - 1, day);
+    
+    
+    d.setDate(d.getDate() + 1);
+    
+    const outYear = d.getFullYear();
+    const outMonth = String(d.getMonth() + 1).padStart(2, '0');
+    const outDay = String(d.getDate()).padStart(2, '0');
+    
+    return `${outYear}-${outMonth}-${outDay}`;
+  }
+
+  
+  return depDate;
 };
+
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 const Inp = ({ label, name, value, onChange, placeholder, type = "text", required, readOnly }) => (
@@ -450,6 +467,7 @@ const SchedulingPanel = ({ token }) => {
         const depDate = name === "departureDate" ? value : f.departureDate;
         const depTime = name === "departureTime" ? value : f.departureTime;
         const arrTime = name === "arrivalTime"   ? value : f.arrivalTime;
+        console.log("Computing arrival date with", { depDate, depTime, arrTime });
         updated.arrivalDate = computeArrivalDate(depDate, depTime, arrTime);
       }
       return updated;

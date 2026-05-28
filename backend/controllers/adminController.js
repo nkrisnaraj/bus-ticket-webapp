@@ -95,12 +95,108 @@ exports.getAllSchedules = async (req, res) => {
   }
 };
 
+// exports.createSchedule = async (req, res) => {
+//   const { busId, source, destination, departureDate, departureTime, arrivalDate, arrivalTime, price,
+//           isRecurring, recurringDays, recurringEndDate } = req.body;
+//   if (!busId || !source || !destination || !departureDate || !departureTime || !arrivalTime || !price) {
+//     return res.status(400).json({ success: false, message: 'All trip fields are required' });
+//   }
+//   try {
+//     const bus = await Fleet.findById(busId);
+//     if (!bus) return res.status(404).json({ success: false, message: 'Fleet vehicle not found' });
+
+//     // Validate source/destination against bus registered route
+//     if (bus.source && bus.destination) {
+//       const s = source.trim().toLowerCase();
+//       const d = destination.trim().toLowerCase();
+//       const bs = bus.source.toLowerCase();
+//       const bd = bus.destination.toLowerCase();
+//       if (!((s === bs && d === bd) || (s === bd && d === bs))) {
+//         return res.status(400).json({
+//           success: false,
+//           message: `This bus only operates between ${bus.source} and ${bus.destination}`,
+//         });
+//       }
+//     }
+
+//     const totalSeats = bus.totalSeats || 47;
+
+//     // Helper to compute arrival date when overnight (arrivalTime < departureTime)
+//     const computeArrDate = (depDate, depTime, arrTime, explicitArrDate) => {
+//       if (explicitArrDate) return explicitArrDate;
+//       if (!depTime || !arrTime || arrTime >= depTime) return depDate;
+//       const next = new Date(depDate + 'T00:00:00');
+//       next.setDate(next.getDate() + 1);
+//       return next.toISOString().split('T')[0];
+//     };
+
+//     const baseData = {
+//       busId, source, destination, departureTime, arrivalTime, price: Number(price),
+//       totalSeats, bookedSeats: [],
+//     };
+
+//     // ── Recurring: create one Schedule per matching weekday in date range ────
+//     if (isRecurring && Array.isArray(recurringDays) && recurringDays.length > 0 && recurringEndDate) {
+//       const dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+//       const validDayNums = recurringDays.filter(d => dayMap[d] !== undefined).map(d => dayMap[d]);
+//       if (validDayNums.length === 0) {
+//         return res.status(400).json({ success: false, message: 'Invalid recurring days' });
+//       }
+//       const recurringGroupId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+//       const start = new Date(departureDate + 'T00:00:00');
+//       const end   = new Date(recurringEndDate + 'T00:00:00');
+//       const schedulesToCreate = [];
+//       const current = new Date(start);
+//       while (current <= end) {
+//         if (validDayNums.includes(current.getDay())) {
+//           const depDateStr = current.toISOString().split('T')[0];
+//           schedulesToCreate.push({
+//             ...baseData,
+//             departureDate: depDateStr,
+//             arrivalDate: computeArrDate(depDateStr, departureTime, arrivalTime, null),
+//             isRecurring: true,
+//             recurringGroupId,
+//           });
+//         }
+//         current.setDate(current.getDate() + 1);
+//       }
+//       if (schedulesToCreate.length === 0) {
+//         return res.status(400).json({ success: false, message: 'No matching dates in the selected range' });
+//       }
+//       const created = await Schedule.insertMany(schedulesToCreate);
+//       const first = await Schedule.findById(created[0]._id).populate('busId', 'busNumber type');
+//       return res.status(201).json({
+//         success: true,
+//         message: `${created.length} recurring trip${created.length !== 1 ? 's' : ''} scheduled`,
+//         schedule: first,
+//         count: created.length,
+//       });
+//     }
+
+//     // ── Single schedule ──────────────────────────────────────────────────────
+//     const computedArrivalDate = computeArrDate(departureDate, departureTime, arrivalTime, arrivalDate);
+//     const schedule = await Schedule.create({
+//       ...baseData,
+//       departureDate,
+//       arrivalDate: computedArrivalDate,
+//       isRecurring: false,
+//     });
+//     const populated = await schedule.populate('busId', 'busNumber type');
+//     res.status(201).json({ success: true, message: 'Schedule created', schedule: populated });
+//   } catch (error) {
+//     console.error('createSchedule error:', error);
+//     res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// };
+
 exports.createSchedule = async (req, res) => {
   const { busId, source, destination, departureDate, departureTime, arrivalDate, arrivalTime, price,
           isRecurring, recurringDays, recurringEndDate } = req.body;
+  
   if (!busId || !source || !destination || !departureDate || !departureTime || !arrivalTime || !price) {
     return res.status(400).json({ success: false, message: 'All trip fields are required' });
   }
+
   try {
     const bus = await Fleet.findById(busId);
     if (!bus) return res.status(404).json({ success: false, message: 'Fleet vehicle not found' });
@@ -121,13 +217,19 @@ exports.createSchedule = async (req, res) => {
 
     const totalSeats = bus.totalSeats || 47;
 
-    // Helper to compute arrival date when overnight (arrivalTime < departureTime)
+    // Helper: Safely compute arrival date without timezone shift
     const computeArrDate = (depDate, depTime, arrTime, explicitArrDate) => {
       if (explicitArrDate) return explicitArrDate;
       if (!depTime || !arrTime || arrTime >= depTime) return depDate;
-      const next = new Date(depDate + 'T00:00:00');
+      
+      const [year, month, day] = depDate.split('-');
+      const next = new Date(year, month - 1, day);
       next.setDate(next.getDate() + 1);
-      return next.toISOString().split('T')[0];
+      
+      const outYear = next.getFullYear();
+      const outMonth = String(next.getMonth() + 1).padStart(2, '0');
+      const outDay = String(next.getDate()).padStart(2, '0');
+      return `${outYear}-${outMonth}-${outDay}`;
     };
 
     const baseData = {
@@ -139,17 +241,30 @@ exports.createSchedule = async (req, res) => {
     if (isRecurring && Array.isArray(recurringDays) && recurringDays.length > 0 && recurringEndDate) {
       const dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
       const validDayNums = recurringDays.filter(d => dayMap[d] !== undefined).map(d => dayMap[d]);
+      
       if (validDayNums.length === 0) {
         return res.status(400).json({ success: false, message: 'Invalid recurring days' });
       }
+
       const recurringGroupId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      const start = new Date(departureDate + 'T00:00:00');
-      const end   = new Date(recurringEndDate + 'T00:00:00');
       const schedulesToCreate = [];
+      
+      // Safely split dates to avoid timezone shift
+      const [sYear, sMonth, sDay] = departureDate.split('-');
+      const [eYear, eMonth, eDay] = recurringEndDate.split('-');
+      
+      const start = new Date(sYear, sMonth - 1, sDay);
+      const end   = new Date(eYear, eMonth - 1, eDay);
       const current = new Date(start);
+
       while (current <= end) {
         if (validDayNums.includes(current.getDay())) {
-          const depDateStr = current.toISOString().split('T')[0];
+          // Format safely back to YYYY-MM-DD
+          const cYear = current.getFullYear();
+          const cMonth = String(current.getMonth() + 1).padStart(2, '0');
+          const cDay = String(current.getDate()).padStart(2, '0');
+          const depDateStr = `${cYear}-${cMonth}-${cDay}`;
+          
           schedulesToCreate.push({
             ...baseData,
             departureDate: depDateStr,
@@ -160,11 +275,14 @@ exports.createSchedule = async (req, res) => {
         }
         current.setDate(current.getDate() + 1);
       }
+
       if (schedulesToCreate.length === 0) {
         return res.status(400).json({ success: false, message: 'No matching dates in the selected range' });
       }
+
       const created = await Schedule.insertMany(schedulesToCreate);
       const first = await Schedule.findById(created[0]._id).populate('busId', 'busNumber type');
+      
       return res.status(201).json({
         success: true,
         message: `${created.length} recurring trip${created.length !== 1 ? 's' : ''} scheduled`,
@@ -181,8 +299,10 @@ exports.createSchedule = async (req, res) => {
       arrivalDate: computedArrivalDate,
       isRecurring: false,
     });
+    
     const populated = await schedule.populate('busId', 'busNumber type');
     res.status(201).json({ success: true, message: 'Schedule created', schedule: populated });
+    
   } catch (error) {
     console.error('createSchedule error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
